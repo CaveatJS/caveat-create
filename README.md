@@ -1,20 +1,18 @@
 # caveat-create
 
-Caveat is an open-source publishing app with a simple editor, an editable website, and email delivery—on infrastructure you own.
+The npm project initializer for [Caveat](https://github.com/Caveat-Newsletter/site).
 
-The website is the publication. Email is a distribution channel.
+This repository will contain the CLI that creates a new Caveat publication. The actual publishing application lives in [Caveat-Newsletter/site](https://github.com/Caveat-Newsletter/site).
 
 ## Status
 
-Initial repository. The application and project initializer are not implemented yet.
+Initial repository. The initializer is not implemented or published to npm yet. The npm package name and command are still to be confirmed.
 
 ## Initial scope
 
-- One ready-made publication with a browser editor.
-- Independent web publishing and email sending.
-- One polished, editable theme and an RSS feed.
-- Publication identity and support for multiple credited authors.
-- Portable content and subscriber exports.
-- One email provider to start, with a contained integration.
+- Ask for a project directory.
+- Create the project from a versioned release of the site application.
+- Install dependencies and explain how to start locally.
+- Point users to the application's setup flow for publication details and email configuration.
 
-Both developer installation and guided online deployment should produce the same application. Discovery networks, component registries, and learning tools are future possibilities.
+The site repository is the source of truth for the application. Developer installation and guided online deployment should use the same versioned application, without maintaining separate copies of its implementation.
