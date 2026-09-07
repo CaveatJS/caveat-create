@@ -1,0 +1,16 @@
+{
+  "name": "create-caveat",
+  "version": "0.1.0-alpha.0",
+  "description": "Create a Caveat publication project from the official site scaffold (development preview).",
+  "type": "module",
+  "bin": { "create-caveat": "bin/create-caveat.js" },
+  "files": ["bin/", "lib/"],
+  "engines": { "node": ">=20" },
+  "scripts": { "test": "node --test" },
+  "repository": { "type": "git", "url": "git+https://github.com/Caveat-Newsletter/caveat-create.git" },
+  "homepage": "https://github.com/Caveat-Newsletter/caveat-create#readme",
+  "bugs": { "url": "https://github.com/Caveat-Newsletter/caveat-create/issues" },
+  "license": "MIT",
+  "publishConfig": { "access": "public", "tag": "next", "registry": "https://registry.npmjs.org/" },
+  "keywords": ["caveat", "newsletter", "publishing", "initializer"]
+}
