@@ -1,65 +1,32 @@
-# caveat-create
+# create-caveat
 
-The npm project initializer for [Caveat](https://github.com/CaveatJS/site).
+The npm initializer for [Caveat](https://github.com/CaveatJS/site): a newsletter website, browser editor, subscriber management, and email delivery on infrastructure you own.
 
-Create a working publication with article pages, a local Markdown editor, and RSS. The application source lives in [CaveatJS/site](https://github.com/CaveatJS/site).
-
-![Caveat journal homepage with a featured essay, recent writing, and RSS links](https://raw.githubusercontent.com/CaveatJS/caveat-create/main/docs/screenshots/publication.png)
-
-[Explore the editor and reading experience](#screenshots).
-
-## Status
-
-`0.1.0-alpha.1` includes a runnable Next.js application. The earlier `alpha.0` release copied documentation only; use the current `next` release or an explicit version.
-
-## Usage
+## Start writing
 
 ```sh
-npm create caveat@next my-publication
-cd my-publication
+npm create caveat@latest my-newsletter
+cd my-newsletter
 npm run dev
 ```
 
-Open **http://localhost:3000** for the website and **http://localhost:3000/studio** for the editor. If that port is busy, use the address printed in the terminal.
+Both @latest and @next install this full application release.
 
-Requires Node.js 20.9+, Git, and access to GitHub and npm. Omit the directory to be prompted. Dependencies install automatically; pass `--skip-install` to install them yourself later. Existing paths are never overwritten. The generated project does not retain the source repository's Git history.
+Requires Node.js 22.12+, Git, and access to GitHub and npm. Dependencies install automatically. The first dev run starts a persistent local Prisma Postgres database and saves a private setup key in `.env`. Open the website, enter that key, create your owner account, and name your publication.
 
-Posts are saved to Markdown files in `content/posts`. The browser editor runs locally in development; production builds serve the publication with the editor disabled. Email, subscriber management, and a hosted editor are not included yet.
+Write and publish locally without cloud accounts. Connect Resend in Settings when you want email delivery. Deploy the same application to your own Vercel project with the Prisma Postgres integration. Deployment and owner recovery instructions are included in the generated project.
 
-Run locally before publication:
+## Behaviour
 
-```sh
-node bin/create-caveat.js my-publication
-node bin/create-caveat.js --help
-npm test
-```
+- Downloads the pinned application commit from `CaveatJS/site`.
+- Checks that the app, Prisma schema, startup script, and lockfile exist.
+- Removes Git history from the generated project.
+- Refuses to overwrite an existing directory.
+- Preserves the project if dependency installation fails.
+- Supports `--skip-install`, `--help`, and `--version`.
 
-## Initial scope
+The database-backed editor replaces the alpha releases’ development-only Markdown editor. Existing alpha publications should retain their Markdown content before upgrading; automatic content migration is not included.
 
-- Ask for a directory and copy a pinned, verified version of the site app.
-- Install dependencies and print the website and editor startup instructions.
-- Preserve the project and explain recovery if dependency installation fails.
+## Maintainers
 
-The site repository is the source of truth for the application. Developer installation and guided online deployment should use the same versioned application, without maintaining separate copies of its implementation.
-
-## Screenshots
-
-Captured from the local Markdown starter with its bundled sample posts.
-
-### Write and manage posts
-
-Keep drafts and published essays together. Edit your writing, author credits, publication date, and post URL in the browser.
-
-![Caveat editor showing draft and published posts, author credits, date, URL, and Markdown writing](https://raw.githubusercontent.com/CaveatJS/caveat-create/main/docs/screenshots/editor.png)
-
-### Preview your writing
-
-Switch to Preview to see headings, links, inline code, and quotations rendered before publishing to your local website.
-
-![Caveat Markdown preview rendering an essay with headings, inline code, and a quotation](https://raw.githubusercontent.com/CaveatJS/caveat-create/main/docs/screenshots/preview.png)
-
-### Give every essay a home
-
-A dedicated reading page brings together the title, description, author, date, reading time, and article text.
-
-![Caveat article page with its title, author, reading time, and essay typography](https://raw.githubusercontent.com/CaveatJS/caveat-create/main/docs/screenshots/article.png)
+Update `revision` in `lib/create-project.js` after the application commit passes its database, browser, and production-build checks. Run `npm test`, `npm pack --dry-run`, and a fresh installation before publishing. Never include npm credentials or application secrets in the package.

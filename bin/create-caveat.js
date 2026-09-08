@@ -8,14 +8,14 @@ const { version } = JSON.parse(await readFile(new URL('../package.json', import.
 const args = process.argv.slice(2);
 const help = `Create Caveat ${version}
 
-Usage: npm create caveat@next [directory]
+Usage: npm create caveat@latest [directory]
 
-Creates a working publication with a local editor and installs dependencies.
-Requires Node.js 20.9+, Git, and access to GitHub and npm.
+Creates a working publication with an owner dashboard and installs dependencies.
+Requires Node.js 22.12+, Git, and access to GitHub and npm.
 Existing directories are never overwritten.
 
-Includes article pages, Markdown posts, and RSS. The editor runs locally.
-Email delivery and a hosted editor are not included yet.
+Includes a rich-text editor, Prisma Postgres, email/password sign-in, and RSS.
+Connect Resend for newsletters. Deploy the same app to your Vercel account.
 
 Options:
   --help, -h     Show help
@@ -30,6 +30,10 @@ async function main() {
   if (args.length === 1 && ['--version', '-v'].includes(args[0])) {
     console.log(version);
     return;
+  }
+  const [major, minor] = process.versions.node.split('.').map(Number);
+  if (major < 22 || (major === 22 && minor < 12)) {
+    throw new Error('Caveat needs Node.js 22.12 or newer. Update Node.js, then run this command again.');
   }
   const skipInstall = args.includes('--skip-install');
   const positional = args.filter(arg => arg !== '--skip-install');
@@ -62,7 +66,7 @@ async function main() {
   }
   // Quote paths for the user's shell; no generated command is executed here.
   const quoted = process.platform === 'win32' ? `"${target}"` : `'${target.replace(/'/g, "'\\''")}'`;
-  console.log(`\nYour publication is ready.\n\n  cd ${quoted}\n${skipInstall ? '  npm install\n' : ''}  npm run dev\n\nWebsite: http://localhost:3000\nEditor:  http://localhost:3000/studio\n\nThe terminal will show a different port if 3000 is busy.\nPosts are saved in content/posts. Email is not connected yet.`);
+  console.log(`\nYour publication is ready.\n\n  cd ${quoted}\n${skipInstall ? '  npm install\n' : ''}  npm run dev\n\nOpen http://localhost:3000 to create your owner account.\nYour private setup key will be saved in .env as CAVEAT_SETUP_KEY.\nA persistent local Prisma Postgres database starts automatically.\nConnect Resend in Settings when you are ready to send email.`);
 }
 
 main().catch(error => {

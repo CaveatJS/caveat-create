@@ -17,8 +17,12 @@ test('copies the pinned revision without Git history and protects existing paths
     await writeFile(join(repo, '.gitignore'), 'node_modules/\n');
     await writeFile(join(repo, 'package.json'), JSON.stringify({ scripts: { dev: 'next dev', build: 'next build' }, dependencies: { next: '16.3.4' } }));
     await writeFile(join(repo, 'package-lock.json'), '{}');
-    await mkdir(join(repo, 'app'));
-    await writeFile(join(repo, 'app', 'page.tsx'), 'export default function Page() { return <h1>Hello</h1>; }');
+    await mkdir(join(repo, 'src', 'app'), { recursive: true });
+    await mkdir(join(repo, 'prisma'));
+    await mkdir(join(repo, 'scripts'));
+    await writeFile(join(repo, 'src', 'app', 'page.tsx'), 'export default function Page() { return <h1>Hello</h1>; }');
+    await writeFile(join(repo, 'prisma', 'schema.prisma'), 'datasource db { provider = "postgresql" }');
+    await writeFile(join(repo, 'scripts', 'dev.mjs'), '// Starts the application and database');
     git('add', '.');
     git('-c', 'user.name=Caveat Test', '-c', 'user.email=test@example.com', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'Fixture');
     const revision = git('rev-parse', 'HEAD');
@@ -45,7 +49,7 @@ test('CLI explains the runnable app and rejects invalid arguments', () => {
   const bin = fileURLToPath(new URL('../bin/create-caveat.js', import.meta.url));
   const output = execFileSync(process.execPath, [bin, '--help'], { encoding: 'utf8' });
   assert.match(output, /Creates a working publication/);
-  assert.match(output, /npm create caveat@next/);
+  assert.match(output, /npm create caveat@latest/);
   assert.throws(() => execFileSync(process.execPath, [bin, '--unknown'], { stdio: 'pipe' }), { status: 1 });
 });
 
