@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { readFile } from 'node:fs/promises';
 import { createInterface } from 'node:readline/promises';
+import { spawnSync } from 'node:child_process';
 import { createProject } from '../lib/create-project.js';
 
 const { version } = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
@@ -9,16 +10,17 @@ const help = `Create Caveat ${version}
 
 Usage: npm create caveat@next [directory]
 
-Creates a new directory from a pinned version of Caveat-Newsletter/site.
-Requires Node.js 20+, Git, and access to GitHub.
+Creates a working publication with a local editor and installs dependencies.
+Requires Node.js 20.9+, Git, and access to GitHub and npm.
 Existing directories are never overwritten.
 
-DEVELOPMENT PREVIEW: the scaffold contains project documentation only.
-The publishing app is not implemented yet. This does not deploy a website.
+Includes article pages, Markdown posts, and RSS. The editor runs locally.
+Email delivery and a hosted editor are not included yet.
 
 Options:
   --help, -h     Show help
-  --version, -v  Show version`;
+  --version, -v  Show version
+  --skip-install  Create the project without installing dependencies`;
 
 async function main() {
   if (args.length === 1 && ['--help', '-h'].includes(args[0])) {
@@ -29,10 +31,12 @@ async function main() {
     console.log(version);
     return;
   }
-  if (args.length > 1 || args.some(arg => arg.startsWith('-'))) {
+  const skipInstall = args.includes('--skip-install');
+  const positional = args.filter(arg => arg !== '--skip-install');
+  if (positional.length > 1 || positional.some(arg => arg.startsWith('-'))) {
     throw new Error('Unrecognised arguments. Run create-caveat --help for usage.');
   }
-  let directory = args[0];
+  let directory = positional[0];
   if (!directory) {
     if (!process.stdin.isTTY) throw new Error('Provide a project directory. Run create-caveat --help for usage.');
     const prompt = createInterface({ input: process.stdin, output: process.stdout });
@@ -42,10 +46,23 @@ async function main() {
       prompt.close();
     }
   }
-  console.log('Caveat development preview: this creates documentation, not a working web app yet.');
-  console.log('Downloading the official project scaffold…');
+  console.log('Creating your Caveat publication…');
   const target = await createProject(directory);
-  console.log(`Created ${target}\nOpen README.md for the current scope and project status.`);
+  if (!skipInstall) {
+    console.log('Installing dependencies…');
+    const npmCli = process.env.npm_execpath;
+    const command = npmCli && /npm-cli\.js$/.test(npmCli) ? process.execPath : process.platform === 'win32' ? 'npm.cmd' : 'npm';
+    const commandArgs = command === process.execPath ? [npmCli, 'ci', '--no-fund', '--no-audit'] : ['ci', '--no-fund', '--no-audit'];
+    const result = spawnSync(command, commandArgs, { cwd: target, stdio: 'inherit', shell: process.platform === 'win32' && command === 'npm.cmd' });
+    if (result.error || result.status !== 0) {
+      console.error(`Your project is saved at ${target}, but dependency installation did not finish.\nOpen that folder, run npm install, then npm run dev.`);
+      process.exitCode = 1;
+      return;
+    }
+  }
+  // Quote paths for the user's shell; no generated command is executed here.
+  const quoted = process.platform === 'win32' ? `"${target}"` : `'${target.replace(/'/g, "'\\''")}'`;
+  console.log(`\nYour publication is ready.\n\n  cd ${quoted}\n${skipInstall ? '  npm install\n' : ''}  npm run dev\n\nWebsite: http://localhost:3000\nEditor:  http://localhost:3000/studio\n\nThe terminal will show a different port if 3000 is busy.\nPosts are saved in content/posts. Email is not connected yet.`);
 }
 
 main().catch(error => {

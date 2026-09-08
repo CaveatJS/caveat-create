@@ -1,22 +1,26 @@
 # caveat-create
 
-The npm project initializer for [Caveat](https://github.com/Caveat-Newsletter/site).
+The npm project initializer for [Caveat](https://github.com/CaveatJS/site).
 
-This repository contains the CLI that creates a new Caveat publication project. The actual publishing application belongs in [Caveat-Newsletter/site](https://github.com/Caveat-Newsletter/site).
+Create a working publication with article pages, a local Markdown editor, and RSS. The application source lives in [CaveatJS/site](https://github.com/CaveatJS/site).
 
 ## Status
 
-Development preview: `create-caveat` copies a pinned revision of the official site scaffold. That scaffold currently contains documentation only. **It does not create or deploy a working website yet.**
+`0.1.0-alpha.1` includes a runnable Next.js application. The earlier `alpha.0` release copied documentation only; use the current `next` release or an explicit version.
 
 ## Usage
 
-Once published to npm under the `next` tag:
-
 ```sh
 npm create caveat@next my-publication
+cd my-publication
+npm run dev
 ```
 
-Requires Node.js 20+, Git, and access to GitHub. Omit the directory to be prompted. Existing paths are never overwritten. The generated project does not retain the source repository's Git history.
+Open **http://localhost:3000** for the website and **http://localhost:3000/studio** for the editor. If that port is busy, use the address printed in the terminal.
+
+Requires Node.js 20.9+, Git, and access to GitHub and npm. Omit the directory to be prompted. Dependencies install automatically; pass `--skip-install` to install them yourself later. Existing paths are never overwritten. The generated project does not retain the source repository's Git history.
+
+Posts are saved to Markdown files in `content/posts`. The browser editor runs locally in development; production builds serve the publication with the editor disabled. Email, subscriber management, and a hosted editor are not included yet.
 
 Run locally before publication:
 
@@ -28,7 +32,8 @@ npm test
 
 ## Initial scope
 
-- Implemented: ask for a directory and copy a pinned commit of the site scaffold.
-- Planned when the app exists: install dependencies, explain local startup, and open the setup flow for publication details and email configuration.
+- Ask for a directory and copy a pinned, verified version of the site app.
+- Install dependencies and print the website and editor startup instructions.
+- Preserve the project and explain recovery if dependency installation fails.
 
 The site repository is the source of truth for the application. Developer installation and guided online deployment should use the same versioned application, without maintaining separate copies of its implementation.

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtemp, readFile, writeFile, rm, access } from 'node:fs/promises';
+import { mkdtemp, readFile, writeFile, rm, access, mkdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,6 +15,10 @@ test('copies the pinned revision without Git history and protects existing paths
     const git = (...args) => execFileSync('git', ['-C', repo, ...args], { encoding: 'utf8' }).trim();
     await writeFile(join(repo, 'README.md'), 'Pinned content');
     await writeFile(join(repo, '.gitignore'), 'node_modules/\n');
+    await writeFile(join(repo, 'package.json'), JSON.stringify({ scripts: { dev: 'next dev', build: 'next build' }, dependencies: { next: '16.3.4' } }));
+    await writeFile(join(repo, 'package-lock.json'), '{}');
+    await mkdir(join(repo, 'app'));
+    await writeFile(join(repo, 'app', 'page.tsx'), 'export default function Page() { return <h1>Hello</h1>; }');
     git('add', '.');
     git('-c', 'user.name=Caveat Test', '-c', 'user.email=test@example.com', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'Fixture');
     const revision = git('rev-parse', 'HEAD');
@@ -37,10 +41,25 @@ test('copies the pinned revision without Git history and protects existing paths
   }
 });
 
-test('CLI reports preview status and rejects invalid arguments', () => {
+test('CLI explains the runnable app and rejects invalid arguments', () => {
   const bin = fileURLToPath(new URL('../bin/create-caveat.js', import.meta.url));
   const output = execFileSync(process.execPath, [bin, '--help'], { encoding: 'utf8' });
-  assert.match(output, /DEVELOPMENT PREVIEW/);
+  assert.match(output, /Creates a working publication/);
   assert.match(output, /npm create caveat@next/);
   assert.throws(() => execFileSync(process.execPath, [bin, '--unknown'], { stdio: 'pipe' }), { status: 1 });
+});
+
+test('rejects documentation-only templates instead of reporting success', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'caveat-incomplete-'));
+  try {
+    const repo = join(root, 'source');
+    execFileSync('git', ['init', '--quiet', repo]);
+    await writeFile(join(repo, 'README.md'), 'Only documentation');
+    execFileSync('git', ['-C', repo, 'add', '.']);
+    execFileSync('git', ['-C', repo, '-c', 'user.name=Test', '-c', 'user.email=test@example.com', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'Incomplete']);
+    const revision = execFileSync('git', ['-C', repo, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+    const target = join(root, 'publication');
+    await assert.rejects(createProject(target, { repository: repo, revision }));
+    await assert.rejects(access(target), { code: 'ENOENT' });
+  } finally { await rm(root, { recursive: true, force: true }); }
 });
